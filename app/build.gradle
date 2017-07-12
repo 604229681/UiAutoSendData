@@ -1,0 +1,50 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion '25.0.0'
+    defaultConfig {
+        applicationId "com.auto.yunpan.uiautosenddata"
+        minSdkVersion 18
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        signKey {
+            keyAlias 'halove'
+            keyPassword 'halove@hz'
+            storeFile file('../platform.keystore')//MD5：0c3f5943f1df06a755c26ff1f5254045
+            storePassword 'halove@hz'
+        }
+    }
+
+    buildTypes {
+        debug{
+            signingConfig signingConfigs.signKey
+        }
+
+        release {
+            signingConfig signingConfigs.signKey
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+        compile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
+    compile 'com.android.support.test:runner:0.5'
+    compile 'com.android.support.test:rules:0.5'
+    compile 'junit:junit:4.12'
+}

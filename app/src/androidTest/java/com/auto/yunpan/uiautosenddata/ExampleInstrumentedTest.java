@@ -16,6 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.CountDownLatch;
+
 import static java.lang.Thread.sleep;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.*;
@@ -51,17 +53,24 @@ public class ExampleInstrumentedTest {
         // open app
         openApp("com.auto.yunpan.testuiauto");
 
+//        CountDownLatch latch = new CountDownLatch(1); //创建CountDownLatch
+
+        createSockt();
+
+//        latch.await();
+    }
+
+    @Test
+    public void createSockt() throws Exception {
         while (true) {
             if (null == socketServer) {
                 socketServer = new SocketServer();
                 socketServer.setSocketCallBack(new SocketServer.SocketCallBack() {
                     @Override
                     public void onSuccess(String code) {
-                        try {
-                            sendMessage(code);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+
+                        sendMessage(code);
+
                     }
 
                     @Override
@@ -71,30 +80,40 @@ public class ExampleInstrumentedTest {
                 });
                 new Thread(socketServer).start();
             }
+
+            sleep(2000);
         }
     }
 
-    public synchronized void sendMessage(String msg) throws Exception {
-        if (null == device) {
-            device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        }
+    public synchronized void sendMessage(String msg){
+
+//        UiSelector s = new UiSelector().className("android.widget.TextView").instance(1);
+//        UiObject wx_input= new UiObject(new UiSelector().className("android.widget.RelativeLayout").childSelector(new UiSelector().className("android.widget.EditText")));
+
         try {
+            if (null == device) {
+                device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+            }
+
             if (null == uiObject)
                 uiObject = device.findObject(new UiSelector().resourceId("com.auto.yunpan.testuiauto:id/tv_name"));
+
             if (uiObject != null) {
-                uiObject.setText(msg + (item++));
-                uiObject.click();
+                boolean success = uiObject.setText(msg + (item++));
+                if (!success) {
+                    socketServer.disCloseSocket();
+                    socketServer = null;
+                }else {
+                    uiObject.click();
+                }
             }
         } catch (UiObjectNotFoundException e) {
             e.printStackTrace();
             uiObject = null;
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
-//        try {
-//            sleep(10);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public void openApp(String packageName) {
